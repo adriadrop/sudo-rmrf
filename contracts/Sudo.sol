@@ -7,7 +7,6 @@ import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "hardhat/console.sol";
 
 error ERC721Metadata__URI_QueryFor_NonExistentToken();
 error NFT_ALREADY_POWERED();
@@ -27,7 +26,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 4;
+    uint32 private constant NUM_WORDS = 1;
     mapping(uint256 => uint256) public requestIdToTokenId;
 
     event RandomRequested(uint256 indexed requestId, address requester);
