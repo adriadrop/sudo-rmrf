@@ -26,8 +26,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         }
     });
 
+    // Save one vanilla and one powered
     await sudo.tokenURI(tokenId).then((res) => saveSVG(tokenId, res));
-
-    // console.log(`NFT index 0 tokenURI: ${await sudo.tokenURI(0)}`);
+    await sudo.tokenURI(tokenId + 1).then((res) => saveSVG(tokenId + 1, res));
 };
 module.exports.tags = ["all", "mint"];
