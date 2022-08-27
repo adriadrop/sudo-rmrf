@@ -7,16 +7,19 @@ import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "hardhat/console.sol";
 
 error ERC721Metadata__URI_QueryFor_NonExistentToken();
+error NFT_ALREADY_POWERED();
+error NFT_NOT_A_OWNER();
 
 contract Sudo is ERC721A, VRFConsumerBaseV2 {
     // Sudo NFT variables
     bool minted;
     string private imageURIBase;
+    string private powerBarBG;
     mapping(uint256 => uint8) powerBarValue;
     mapping(uint256 => bool) powerBarStatus;
-    string private powerBarBG;
 
     // Chainlink VRF Variables
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
@@ -27,6 +30,9 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
     uint32 private constant NUM_WORDS = 1;
     mapping(uint256 => uint256) public requestIdToTokenId;
 
+    event RandomRequested(uint256 indexed requestId, address requester);
+    event RandomReceived(uint256 indexed random, uint256 indexed tokenId);
+
     constructor(
         string memory svgBaseSliced,
         string memory svgPowerBar,
@@ -34,9 +40,10 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
         uint64 subscriptionId,
         bytes32 gasLane,
         uint32 callbackGasLimit
-    ) ERC721A("Sudo rm -rf OpenSea", "0xDEL") {
+    ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721A("Sudo rm -rf OpenSea", "0xDEL") {
         imageURIBase = svgBaseSliced;
         powerBarBG = svgPowerBar;
+
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
@@ -48,8 +55,13 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
     }
 
     function powerUp(uint256 tokenId) public payable returns (uint256 requestId) {
-        require(msg.sender == ownerOf(tokenId), "Not a Owner");
-        require(powerBarStatus[tokenId], "Already set");
+        if (msg.sender != ownerOf(tokenId)) {
+            revert NFT_NOT_A_OWNER();
+        }
+
+        if (powerBarStatus[tokenId] == true) {
+            revert NFT_ALREADY_POWERED();
+        }
 
         requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
@@ -60,6 +72,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
         );
 
         requestIdToTokenId[requestId] = tokenId;
+        emit RandomRequested(requestId, msg.sender);
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
@@ -68,6 +81,8 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
         // Put random to proper tokenID
         powerBarValue[requestIdToTokenId[requestId]] = random;
         powerBarStatus[requestIdToTokenId[requestId]] = true;
+
+        emit RandomReceived(random, requestIdToTokenId[requestId]);
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
