@@ -27,7 +27,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
-    uint32 private constant NUM_WORDS = 1;
+    uint32 private constant NUM_WORDS = 4;
     mapping(uint256 => uint256) public requestIdToTokenId;
 
     event RandomRequested(uint256 indexed requestId, address requester);

@@ -8,7 +8,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const sudo = await ethers.getContract("Sudo", deployer);
     const mintAll = await sudo.mint();
 
-    const powerUptTx = await sudo.powerUp(0);
+    let tokenId = 0;
+    const powerUptTx = await sudo.powerUp(tokenId);
     const powerUptTxTxReceipt = await powerUptTx.wait(1);
 
     // Need to listen for response
@@ -24,6 +25,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, sudo.address);
         }
     });
-    console.log(`NFT index 0 tokenURI: ${await sudo.tokenURI(0)}`);
+
+    await sudo.tokenURI(tokenId).then((res) => saveSVG(tokenId, res));
+
+    // console.log(`NFT index 0 tokenURI: ${await sudo.tokenURI(0)}`);
 };
 module.exports.tags = ["all", "mint"];
