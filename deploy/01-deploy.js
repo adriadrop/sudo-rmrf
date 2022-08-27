@@ -38,11 +38,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     arguments = [
         svgBaseSliced,
         svgPowerBar,
-        // vrfCoordinatorV2Address,
-        // subscriptionId,
-        // networkConfig[chainId]["gasLane"],
-        // networkConfig[chainId]["mintFee"],
-        // networkConfig[chainId]["callbackGasLimit"],
+        vrfCoordinatorV2Address,
+        subscriptionId,
+        networkConfig[chainId]["gasLane"],
+        networkConfig[chainId]["callbackGasLimit"],
     ];
     const sudo = await deploy("Sudo", {
         from: deployer,

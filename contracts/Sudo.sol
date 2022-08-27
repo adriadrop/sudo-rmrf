@@ -5,30 +5,69 @@ pragma solidity ^0.8.9;
 import "erc721a/contracts/ERC721A.sol";
 import "base64-sol/base64.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 
 error ERC721Metadata__URI_QueryFor_NonExistentToken();
 
-contract Sudo is ERC721A {
+contract Sudo is ERC721A, VRFConsumerBaseV2 {
+    // Sudo NFT variables
     bool minted;
     string private imageURIBase;
-    mapping(uint256 => uint8) powerBarStatus;
+    mapping(uint256 => uint8) powerBarValue;
+    mapping(uint256 => bool) powerBarStatus;
     string private powerBarBG;
 
-    constructor(string memory svgBaseSliced, string memory svgPowerBar) ERC721A("Sudo rm -rf OpenSea", "0xDEL") {
+    // Chainlink VRF Variables
+    VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
+    uint64 private immutable i_subscriptionId;
+    bytes32 private immutable i_gasLane;
+    uint32 private immutable i_callbackGasLimit;
+    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+    uint32 private constant NUM_WORDS = 1;
+    mapping(uint256 => uint256) public requestIdToTokenId;
+
+    constructor(
+        string memory svgBaseSliced,
+        string memory svgPowerBar,
+        address vrfCoordinatorV2,
+        uint64 subscriptionId,
+        bytes32 gasLane,
+        uint32 callbackGasLimit
+    ) ERC721A("Sudo rm -rf OpenSea", "0xDEL") {
         imageURIBase = svgBaseSliced;
         powerBarBG = svgPowerBar;
+        i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
+        i_gasLane = gasLane;
+        i_subscriptionId = subscriptionId;
+        i_callbackGasLimit = callbackGasLimit;
     }
 
     function _baseURI() internal pure override returns (string memory) {
         return "data:application/json;base64,";
     }
 
-    function powerUp(uint256 tokenId) public {
+    function powerUp(uint256 tokenId) public payable returns (uint256 requestId) {
         require(msg.sender == ownerOf(tokenId), "Not a Owner");
-        // There is 18 pixels in power bar, we want to have option that it is full
-        uint8 random = uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, tokenId))) % 19);
+        require(powerBarStatus[tokenId], "Already set");
 
-        powerBarStatus[tokenId] = random;
+        requestId = i_vrfCoordinator.requestRandomWords(
+            i_gasLane,
+            i_subscriptionId,
+            REQUEST_CONFIRMATIONS,
+            i_callbackGasLimit,
+            NUM_WORDS
+        );
+
+        requestIdToTokenId[requestId] = tokenId;
+    }
+
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        // get random and then find module of 19 so we get max 18 pixels of length
+        uint8 random = uint8(randomWords[0] % 19);
+        // Put random to proper tokenID
+        powerBarValue[requestIdToTokenId[requestId]] = random;
+        powerBarStatus[requestIdToTokenId[requestId]] = true;
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -38,18 +77,17 @@ contract Sudo is ERC721A {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
 
-        uint8 powerValue = powerBarStatus[tokenId];
-
-        if (powerValue > 0) {
+        // We check the status and is it set to some number
+        if (powerBarStatus[tokenId]) {
             imageURI = svgToImageURI(
                 string(
                     abi.encodePacked(
                         imageURIBase,
                         powerBarBG,
                         '<rect width="',
-                        Strings.toString(powerBarStatus[tokenId]),
+                        Strings.toString(powerBarValue[tokenId]),
                         '" height="1" x="43" y="2.5" style="fill:rgb(229,59,68);"/><rect width="',
-                        Strings.toString(powerBarStatus[tokenId]),
+                        Strings.toString(powerBarValue[tokenId]),
                         '" height="1" x="43" y="3.5" style="fill:rgb(158,40,53);"/>',
                         "</svg>"
                     )
