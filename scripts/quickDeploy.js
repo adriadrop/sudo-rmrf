@@ -30,6 +30,8 @@ async function main() {
     const svgCut = svg.slice(0, -7);
     //console.log(svgCut);
     // Use SVG images from https://codepen.io/shshaw/pen/XbxvNj
+    // Check other methods for importing images into SVG http://jsfiddle.net/MxHPq/
+    // SVG optimizooor https://jakearchibald.github.io/svgomg/
     const Sudo = await hre.ethers.getContractFactory("Sudo");
     const sudo = await Sudo.deploy(svgCut);
 
