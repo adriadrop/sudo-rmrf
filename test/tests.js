@@ -15,12 +15,10 @@ describe("sudoBasic", function () {
 
     describe("basic", function () {
         it("can mint all supply", async () => {
-            // enter the raffle
             const minted = await sudo.mint();
             const supply = await sudo.totalSupply();
             console.log(supply.toNumber());
             const deployerSupply = await sudo.balanceOf(deployer.address);
-            console.log(deployer.address);
             assert.equal(supply.toNumber(), deployerSupply.toNumber());
         });
 
