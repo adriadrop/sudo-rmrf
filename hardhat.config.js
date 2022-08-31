@@ -1,5 +1,4 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("hardhat-gas-reporter");
 require("hardhat-deploy");
 require("hardhat-contract-sizer");
 require("dotenv").config();
@@ -83,13 +82,13 @@ module.exports = {
     gasReporter: {
         enabled: REPORT_GAS,
         currency: "USD",
-        gasPrice: 2,
+        gasPrice: 8,
         //      outputFile: "gas-report.txt",
         //      noColors: true,
         coinmarketcap: process.env.CMC_KEY,
     },
     contractSizer: {
-        runOnCompile: true,
+        runOnCompile: false,
     },
     namedAccounts: {
         deployer: {

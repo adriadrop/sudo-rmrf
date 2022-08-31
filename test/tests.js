@@ -10,10 +10,11 @@ describe("sudoBasic", function () {
         deployer = accounts[0];
         await deployments.fixture(["main"]);
         sudo = await ethers.getContract("Sudo", deployer);
+        sudoPlain = await ethers.getContract("SudoPlain", deployer);
         //console.log(sudo);
     });
 
-    describe("basic", function () {
+    describe("regular sudo", function () {
         it("can mint all supply", async () => {
             const minted = await sudo.mint();
             const supply = await sudo.totalSupply();
@@ -21,10 +22,15 @@ describe("sudoBasic", function () {
             const deployerSupply = await sudo.balanceOf(deployer.address);
             assert.equal(supply.toNumber(), deployerSupply.toNumber());
         });
+    });
 
-        it("dummy", async () => {
-            const testCheck = "test";
-            assert.equal("test", testCheck);
+    describe("plain sudo", function () {
+        it("can mint all supply", async () => {
+            // const minted = await sudoPlain.mint();
+            const supply = await sudoPlain.totalSupply();
+            console.log(supply.toNumber());
+            const deployerSupply = await sudoPlain.balanceOf(deployer.address);
+            assert.equal(supply.toNumber(), deployerSupply.toNumber());
         });
     });
 });

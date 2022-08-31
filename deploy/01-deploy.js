@@ -1,5 +1,5 @@
 const { network } = require("hardhat");
-const { networkConfig, developmentChains } = require("../helper-hardhat-config");
+const { networkConfig, developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 const fs = require("fs");
 
@@ -33,6 +33,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2;
         subscriptionId = networkConfig[chainId].subscriptionId;
     }
+
+    const waitBlockConfirmations = developmentChains.includes(network.name) ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS;
 
     log("----------------------------------------------------");
 

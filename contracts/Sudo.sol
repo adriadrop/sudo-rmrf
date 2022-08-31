@@ -143,7 +143,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2 {
     function mint() external payable {
         require(!minted, "Mint already completed");
 
-        _mint(msg.sender, 1000);
+        _mint(msg.sender, 1024);
         minted = true;
     }
 }
