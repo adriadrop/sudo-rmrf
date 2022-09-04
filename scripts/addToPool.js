@@ -1,7 +1,10 @@
 const hre = require("hardhat");
 const fs = require("fs");
 let BigNumber = require("bignumber.js");
-//const ethers = require("ethers");
+
+const range = (start, end, step) => {
+    return Array.from(Array.from(Array(Math.ceil((end - start) / step)).keys()), (x) => start + x * step);
+};
 
 async function main() {
     const { deployer } = await getNamedAccounts();
@@ -311,28 +314,18 @@ async function main() {
 
     const SudoFactory = await ethers.getContractAt(abi, "0xcB1514FE29db064fa595628E0BFFD10cdf998F33", deployer);
 
-    // Pool 2 example https://etherscan.io/tx/0xd2c4bc5a5964ab317829e519e0c13a61aca6cdf3fbf030b7533e289da98cd5a6
-    // Contract addresses https://docs.sudoswap.xyz/contracts/
-    // Sudo INU contract https://etherscan.io/address/0xA78c124B4F7368adDE6a74D32eD9C369fe016F20
-
+    let nfts = Array.from(range(101, 400, 1));
+    console.log(nfts);
     let arguments = [
         "0x4BaDb8D5991934F5151DFf657b5AD2664b9db0C3", // NFT
-        "0x3764b9FE584719C4570725A2b5A2485d418A186E", // Linear Curve
-        "0x0000000000000000000000000000000000000000", // Recipient
-        2, // Pool type. 0,1,2 tuples  for buy, sell, trade
-        ethers.utils.parseEther("0.001"), // Delta
-        ethers.utils.parseEther("0.01"), // Fee  this is 1%
-        ethers.utils.parseEther("0.001"), // Starting price
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], // Array of NFT ids
+        nfts, // Array of NFT ids
+        "0x77A89C7De44C3D864067333E72f375f59709100e", //address of new SC created by sudoswap
     ];
 
-    // First approve SudoSwap to use all NFTs on this contract
-    // const setApproval = await SudoFactory.setApprovalForAll("0xb16c1342E617A5B6E4b631EB114483FDB289c0A4", true, { gasLimit: 100000 });
-
     // Then we create pair for it
-    const sudoFactoryPair = await SudoFactory.createPairETH(...arguments, { gasLimit: 100000 });
+    const sudoAddNFts = await SudoFactory.depositNFTs(...arguments, { gasLimit: 29000000 });
 
-    const txReceipt = await sudoFactoryPair.wait(1);
+    const txReceipt = await sudoAddNFts.wait(1);
     //await sudoFactoryPair.deployed();
     console.log(`Sudo Pair deployed to ${txReceipt}`);
 }
