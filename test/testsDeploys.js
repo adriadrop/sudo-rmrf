@@ -36,6 +36,7 @@ describe("sudoBasic", function () {
     describe("Test sudo", function () {
         it("check url of token, phase 2", async () => {
             const tokenId = 1;
+            // Split image in 2 trx as it is too big
             const svg1 = svg.slice(0, svg.length / 2);
             const svg2 = svg.slice(svg.length / 2, svg.length);
             await sudo.setPhase(1);
