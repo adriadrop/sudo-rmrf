@@ -23,14 +23,14 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     mapping(uint256 => bool) vrfStatus;
 
     // In which phase is project currently
-    enum Phases {
+    enum PHASES {
         ONE,
         TWO,
         THREE,
         FOUR
     }
-    Phases public phase;
-    strin public ipfs;
+    PHASES public phase;
+    string public ipfs;
 
     // Chainlink VRF Variables
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
@@ -62,18 +62,18 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     }
 
     // Update status by passing uint into input
-    function setPhase(Phases _phase) public onlyOwner {
+    function setPhase(PHASES _phase) public onlyOwner {
         phase = _phase;
     }
 
     // Update ipfs
-    function setIpfs(Phases _ipfs) public onlyOwner {
+    function setIpfs(string memory _ipfs) public onlyOwner {
         ipfs = _ipfs;
     }
 
     // upload images to chain
     function setImages(string memory _svg, uint8 position) public onlyOwner {
-        imagesVRFED[postion];
+        imagesVRFED[position];
     }
 
     function getVRF(uint256 tokenId) public payable returns (uint256 requestId) {
@@ -107,25 +107,25 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         emit RandomReceived(random, requestIdToTokenId[requestId]);
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         // Use different code depending on phase
-        if (phase == "TWO") {
+        if (phase == PHASES.TWO) {
             // here we will use onchain storage of image, same one for all
-            return tokenURI2(tokenId);
-        } else if (phase == "THREE") {
+            return tokenURI2(_tokenId);
+        } else if (phase == PHASES.THREE) {
             // here we will use different IPFS image for each NFT depending on randomness that they got
-            return tokenURI3(tokenId);
-        } else if (phase == "FOUR") {
+            return tokenURI3(_tokenId);
+        } else if (phase == PHASES.FOUR) {
             // here we are full of money and we deployed onchain each image and just pull them out
-            return tokenURI4(tokenId);
+            return tokenURI4(_tokenId);
         } else {
             return ipfs;
         }
     }
 
-    function tokenURI2(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI2(uint256 _tokenId) public view returns (string memory) {
         string memory json;
-        if (!_exists(tokenId)) {
+        if (!_exists(_tokenId)) {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
 
@@ -143,21 +143,21 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         return string(abi.encodePacked(_baseURI(), Base64.encode(bytes(json))));
     }
 
-    function tokenURI3(uint256 _tokenId) public view override returns (string memory) {
-        if (vrfStatus[tokenId] == false) {
+    function tokenURI3(uint256 _tokenId) public view returns (string memory) {
+        if (vrfStatus[_tokenId] == false) {
             revert NFT_NEEDS_VRF();
         }
         // Get json file with image according to random number gotten by VRF
-        return string(abi.encodePacked(ipfs, Strings.toString(vrfValue(_tokenId)), ".json"));
+        return string(abi.encodePacked(ipfs, Strings.toString(vrfValue[_tokenId]), ".json"));
     }
 
-    function tokenURI4(uint256 tokenId) public view virtual override returns (string memory) {
-        if (vrfStatus[tokenId] == false) {
+    function tokenURI4(uint256 _tokenId) public view returns (string memory) {
+        if (vrfStatus[_tokenId] == false) {
             revert NFT_NEEDS_VRF();
         }
 
         string memory json;
-        if (!_exists(tokenId)) {
+        if (!_exists(_tokenId)) {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
 
@@ -167,7 +167,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
                 name(),
                 '", "description":"SudoSwap taking over OpenSea", ',
                 '"attributes": [{"trait_type": "status", "value": randomized}], "image":"',
-                imagesVRFED[vrfValue(_tokenId)],
+                imagesVRFED[vrfValue[_tokenId]],
                 '"}'
             )
         );

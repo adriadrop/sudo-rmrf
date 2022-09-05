@@ -9,8 +9,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const mintAll = await sudo.mint();
 
     let tokenId = 0;
-    const powerUptTx = await sudo.powerUp(tokenId);
-    const powerUptTxTxReceipt = await powerUptTx.wait(1);
+    const vrfTx = await sudo.getVRF(tokenId);
+    const vrfTxReceipt = await vrfTx.wait(1);
 
     // Need to listen for response
     await new Promise(async (resolve, reject) => {
@@ -20,14 +20,14 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             resolve();
         });
         if (chainId == 31337) {
-            const requestId = powerUptTxTxReceipt.events[1].args.requestId.toString();
+            const requestId = vrfTxReceipt.events[1].args.requestId.toString();
             const vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock", deployer);
             await vrfCoordinatorV2Mock.fulfillRandomWords(requestId, sudo.address);
         }
     });
 
     // Save one vanilla and one powered
-    await sudo.tokenURI(tokenId).then((res) => saveSVG(tokenId, res));
-    await sudo.tokenURI(tokenId + 1).then((res) => saveSVG(tokenId + 1, res));
+    // await sudo.tokenURI(tokenId).then((res) => saveSVG(tokenId, res));
+    // await sudo.tokenURI(tokenId + 1).then((res) => saveSVG(tokenId + 1, res));
 };
 module.exports.tags = ["all", "mint"];
