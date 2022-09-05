@@ -17,8 +17,8 @@ error NFT_NEEDS_VRF();
 contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     // Sudo NFT variables
     bool minted;
-    string private imageDefault;
-    string[] private imagesVRFED;
+    string public imageDefault;
+    string[] public imagesVRFED;
     mapping(uint256 => uint8) vrfValue;
     mapping(uint256 => bool) vrfStatus;
 
@@ -70,12 +70,12 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
 
     // upload default image to chain
     function setDefaultImage(string memory _svg) public onlyOwner {
-        imageDefault = _svg;
+        imageDefault = string(abi.encodePacked(imageDefault, _svg));
     }
 
     // upload images to chain
     function setImages(string memory _svg, uint8 position) public onlyOwner {
-        imagesVRFED[position] = _svg;
+        imagesVRFED[position] = string(abi.encodePacked(imagesVRFED[position], _svg));
     }
 
     function getVRF(uint256 tokenId) public payable returns (uint256 requestId) {
@@ -137,7 +137,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
                 name(),
                 '", "description":"SudoSwap taking over OpenSea", ',
                 '"attributes": [{"trait_type": "status", "value": "original"}], "image":"',
-                imageDefault,
+                svgToImageURI(imageDefault),
                 '"}'
             )
         );
@@ -169,7 +169,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
                 name(),
                 '", "description":"SudoSwap taking over OpenSea", ',
                 '"attributes": [{"trait_type": "status", "value": randomized}], "image":"',
-                imagesVRFED[vrfValue[_tokenId]],
+                svgToImageURI(imagesVRFED[vrfValue[_tokenId]]),
                 '"}'
             )
         );
