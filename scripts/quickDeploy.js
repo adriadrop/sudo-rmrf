@@ -25,15 +25,13 @@ function saveSVG(tokenid, data) {
 }
 
 async function main() {
-    const svg = fs.readFileSync("./svg/sudoswap.svg", { encoding: "utf8" });
-    // Cut SVG tag from the end
-    const svgCut = svg.slice(0, -7);
-    //console.log(svgCut);
     // Use SVG images from https://codepen.io/shshaw/pen/XbxvNj
     // Check other methods for importing images into SVG http://jsfiddle.net/MxHPq/
     // SVG optimizooor https://jakearchibald.github.io/svgomg/
+    const svg = fs.readFileSync("./svg/sudoswap.svg", { encoding: "utf8" });
+
     const Sudo = await hre.ethers.getContractFactory("Sudo");
-    const sudo = await Sudo.deploy(svgCut);
+    const sudo = await Sudo.deploy(svg);
 
     await sudo.deployed();
     console.log(`Sudo deployed to ${sudo.address}`);
@@ -43,7 +41,7 @@ async function main() {
 
     // put mints into folder for testing
     for (let i = 1; i < 5; i++) {
-        await sudo.powerUp(i);
+        await sudo.getVRF(i);
         await sudo.tokenURI(i).then((res) => saveSVG(i, res));
     }
 }

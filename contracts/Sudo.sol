@@ -46,19 +46,16 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     event RandomReceived(uint256 indexed random, uint256 indexed tokenId);
 
     constructor(
-        string memory svg,
         address vrfCoordinatorV2,
         uint64 subscriptionId,
         bytes32 gasLane,
         uint32 callbackGasLimit
     ) VRFConsumerBaseV2(vrfCoordinatorV2) ERC721A("Sudo rm -rf OpenSea", "0xDEL") {
-        imageDefault = svg;
-        ipfs = "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
-
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
+        ipfs = "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
     }
 
     // Update status by passing uint into input
@@ -71,9 +68,14 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         ipfs = _ipfs;
     }
 
+    // upload default image to chain
+    function setDefaultImage(string memory _svg) public onlyOwner {
+        imageDefault = _svg;
+    }
+
     // upload images to chain
     function setImages(string memory _svg, uint8 position) public onlyOwner {
-        imagesVRFED[position];
+        imagesVRFED[position] = _svg;
     }
 
     function getVRF(uint256 tokenId) public payable returns (uint256 requestId) {
