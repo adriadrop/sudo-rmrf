@@ -18,7 +18,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     // Sudo NFT variables
     bool minted;
     string public imageDefault;
-    string[] public imagesVRFED;
+    mapping(uint8 => string) imagesVRFED;
     mapping(uint256 => uint8) vrfValue;
     mapping(uint256 => bool) vrfStatus;
 
@@ -74,8 +74,8 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     }
 
     // upload images to chain
-    function setImages(string memory _svg, uint8 position) public onlyOwner {
-        imagesVRFED[position] = string(abi.encodePacked(imagesVRFED[position], _svg));
+    function setImages(string memory _svg, uint8 _position) public onlyOwner {
+        imagesVRFED[_position] = string(abi.encodePacked(imagesVRFED[_position], _svg));
     }
 
     function getVRF(uint256 tokenId) public payable onlyOwner returns (uint256 requestId) {
@@ -126,11 +126,10 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
     }
 
     function tokenURI2(uint256 _tokenId) public view returns (string memory) {
-        string memory json;
         if (!_exists(_tokenId)) {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
-
+        string memory json;
         json = string(
             abi.encodePacked(
                 '{"name":"',
@@ -149,6 +148,9 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         if (vrfStatus[_tokenId] == false) {
             revert NFT_NEEDS_VRF();
         }
+        if (!_exists(_tokenId)) {
+            revert ERC721Metadata__URI_QueryFor_NonExistentToken();
+        }
         // Get json file with image according to random number gotten by VRF, random will actually pick proper json file with proper svg
         return string(abi.encodePacked(ipfs, Strings.toString(vrfValue[_tokenId]), ".json"));
     }
@@ -157,12 +159,10 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         if (vrfStatus[_tokenId] == false) {
             revert NFT_NEEDS_VRF();
         }
-
-        string memory json;
         if (!_exists(_tokenId)) {
             revert ERC721Metadata__URI_QueryFor_NonExistentToken();
         }
-
+        string memory json;
         json = string(
             abi.encodePacked(
                 '{"name":"',
@@ -173,7 +173,6 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
                 '"}'
             )
         );
-
         return string(abi.encodePacked(_baseURI(), Base64.encode(bytes(json))));
     }
 
