@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "hardhat/console.sol";
 
 error ERC721Metadata__URI_QueryFor_NonExistentToken();
 error NFT_ALREADY_VRFED();
@@ -55,7 +56,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
-        ipfs = "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
+        ipfs = "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
     }
 
     // Update status by passing uint into input
@@ -78,7 +79,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         imagesVRFED[position] = string(abi.encodePacked(imagesVRFED[position], _svg));
     }
 
-    function getVRF(uint256 tokenId) public payable returns (uint256 requestId) {
+    function getVRF(uint256 tokenId) public payable onlyOwner returns (uint256 requestId) {
         if (msg.sender != ownerOf(tokenId)) {
             revert NFT_NOT_A_OWNER();
         }
@@ -95,6 +96,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
             NUM_WORDS
         );
 
+        console.log(tokenId);
         requestIdToTokenId[requestId] = tokenId;
         emit RandomRequested(requestId, msg.sender);
     }
@@ -168,7 +170,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
                 '{"name":"',
                 name(),
                 '", "description":"SudoSwap taking over OpenSea", ',
-                '"attributes": [{"trait_type": "status", "value": randomized}], "image":"',
+                '"attributes": [{"trait_type": "status", "value": "randomized"}], "image":"',
                 svgToImageURI(imagesVRFED[vrfValue[_tokenId]]),
                 '"}'
             )

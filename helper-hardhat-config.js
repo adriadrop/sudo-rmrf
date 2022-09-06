@@ -18,7 +18,6 @@ const networkConfig = {
     },
     1: {
         name: "mainnet",
-        keepersUpdateInterval: "30",
         subscriptionId: "6926", // add PROPER value on mainet
     },
 };

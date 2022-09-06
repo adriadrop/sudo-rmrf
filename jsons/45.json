@@ -1,0 +1,9 @@
+{
+  "name": "SudoSwap attack no.45",
+  "description": "SudoSwap taking over OpenSea",
+  "image": "ipfs://QmZrjSmwAHtReYq3FTXuCB93KGoU9uBuAnK2FYasCYFiED/45.svg",
+  "attributes": {
+    "trait_type": "status",
+    "value": "randomized"
+  }
+}

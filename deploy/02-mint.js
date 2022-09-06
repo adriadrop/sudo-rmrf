@@ -8,7 +8,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const sudo = await ethers.getContract("Sudo", deployer);
     const mintAll = await sudo.mint();
 
-    let tokenId = 0;
+    let tokenId = 1;
     const vrfTx = await sudo.getVRF(tokenId);
     const vrfTxReceipt = await vrfTx.wait(1);
 
