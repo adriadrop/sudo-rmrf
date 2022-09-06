@@ -7,8 +7,9 @@ const { saveSVG } = require("../utils/saveSvgs");
 
 describe("sudoBasic", function () {
     let sudo, deployer;
+    const chainId = network.config.chainId;
     const defaultIpfs = "ipfs://Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
-    const ipfsFolder = "ipfs://QmZrjSmwAHtReYq3FTXuCB93KGoU9uBuAnK2FYasCYFiED/";
+    const jsonFolder = "ipfs://QmPmTRw7jove6wcXRCK7XXpmomVqX1FiB2zC5eV4wrtLJd/";
     const svg = fs.readFileSync("./svgs/sudoswap.svg", { encoding: "utf8" });
 
     beforeEach(async () => {
@@ -56,17 +57,15 @@ describe("sudoBasic", function () {
         it("check url of token, phase 3", async () => {
             const tokenId = 1;
             await sudo.setPhase(2);
-            await sudo.setIpfs(ipfsFolder);
+            await sudo.setIpfs(jsonFolder);
 
-            const tokenURI = await sudo.tokenURI(1);
-            console.log(tokenURI);
-            const svgLocal = fs.readFileSync("./svgs/" + tokenId + ".svg", { encoding: "utf8" });
-            const svgRemote = fs.readFileSync(tokenURI, { encoding: "utf8" });
+            const tokenURI = await sudo.tokenURI(tokenId);
+
+            // const svgLocal = fs.readFileSync("./svgs/" + tokenId + ".svg", { encoding: "utf8" });
+            // const svgRemote = jsonFolder fs.readFileSync(tokenURI, { encoding: "utf8" });
 
 
-            console.log(svgRemote);
-
-            assert.equal(svgLocal, svgRemote);
+            assert.equal(tokenURI, `${jsonFolder}6.json`);
 
         });
     });

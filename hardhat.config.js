@@ -82,7 +82,7 @@ module.exports = {
     gasReporter: {
         enabled: REPORT_GAS,
         currency: "USD",
-        gasPrice: 8,
+        //gasPrice: 8,
         //      outputFile: "gas-report.txt",
         //      noColors: true,
         coinmarketcap: process.env.CMC_KEY,

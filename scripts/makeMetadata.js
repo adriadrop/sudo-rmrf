@@ -7,7 +7,7 @@ const outputFolder = "../jsons";
 const dirInput = `${__dirname}/${inputFolder}/`;
 const dirOutput = `${__dirname}/${outputFolder}/`;
 const inputFiles = fs.readdirSync(dirInput).sort();
-const ipfsRoot = "ipfs://QmZrjSmwAHtReYq3FTXuCB93KGoU9uBuAnK2FYasCYFiED/";
+const ipfsRoot = "ipfs://QmZRTUqyfQoaT7xYbFmWjcNjA9aCnEDx5UjEQpKx59RTQQ/";
 
 // Clear all directory for new files
 fs.readdirSync(dirOutput, (err, files) => {

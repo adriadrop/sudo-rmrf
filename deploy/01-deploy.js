@@ -12,7 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let vrfCoordinatorV2Address, subscriptionId;
 
     // Get SVG base to pass to constructor
-    const svg = fs.readFileSync("./svg/sudoswap.svg", { encoding: "utf8" });
+    const svg = fs.readFileSync("./svgs/sudoswap.svg", { encoding: "utf8" });
 
     if (chainId == 31337) {
         // create VRFV2 Subscription

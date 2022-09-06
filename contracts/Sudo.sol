@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "hardhat/console.sol";
 
 error ERC721Metadata__URI_QueryFor_NonExistentToken();
 error NFT_ALREADY_VRFED();
@@ -96,14 +95,13 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
             NUM_WORDS
         );
 
-        console.log(tokenId);
         requestIdToTokenId[requestId] = tokenId;
         emit RandomRequested(requestId, msg.sender);
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
-        // get random and then find module of 19 so we get max 18 pixels of length
-        uint8 random = uint8(randomWords[0] % 19);
+        // get random and then find module of 18 so we get max 18 pixels of length (we have +1 so its never 0)
+        uint8 random = uint8(randomWords[0] % 18) + uint8(1);
         // Put random to proper tokenID
         vrfValue[requestIdToTokenId[requestId]] = random;
         vrfStatus[requestIdToTokenId[requestId]] = true;
@@ -151,7 +149,7 @@ contract Sudo is ERC721A, VRFConsumerBaseV2, Ownable {
         if (vrfStatus[_tokenId] == false) {
             revert NFT_NEEDS_VRF();
         }
-        // Get json file with image according to random number gotten by VRF
+        // Get json file with image according to random number gotten by VRF, random will actually pick proper json file with proper svg
         return string(abi.encodePacked(ipfs, Strings.toString(vrfValue[_tokenId]), ".json"));
     }
 
