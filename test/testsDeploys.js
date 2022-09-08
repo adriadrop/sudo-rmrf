@@ -27,6 +27,7 @@ describe("sudoBasic", function () {
         });
     });
 
+
     describe("Test sudo", function () {
         it("check url of token, phase 1", async () => {
             const tokenURI = await sudo.tokenURI(1);
